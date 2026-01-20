@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { MapPin, Mail, Phone, Facebook, Instagram, MessageCircle } from "lucide-react";
 
@@ -30,7 +30,8 @@ const courses = [
   { id: 22, title: "Selling to Next-GEN Leaders" },
 ];
 
-const ContactPage = () => {
+// ✅ Separate component that uses useSearchParams
+const ContactFormContent = () => {
   const searchParams = useSearchParams();
   const courseIdFromUrl = searchParams.get("courseId");
 
@@ -39,7 +40,7 @@ const ContactPage = () => {
     lastName: "",
     email: "",
     phone: "",
-    course: "", 
+    course: "",
     message: "",
   });
 
@@ -86,6 +87,144 @@ const ContactPage = () => {
     }
   };
 
+  return (
+    <div className="bg-white h-3/4 rounded-2xl shadow-lg p-6 lg:p-8">
+      <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-6">Get in Touch</h2>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-2">
+              First Name
+            </label>
+            <input
+              type="text"
+              id="firstName"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleInputChange}
+              required
+              placeholder="Enter your first name"
+              className="w-full px-4 py-3 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 mb-2">
+              Last Name
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleInputChange}
+              required
+              placeholder="Enter your last name"
+              className="w-full px-4 py-3 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+            Email Address
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            required
+            placeholder="Enter your email address"
+            className="w-full px-4 py-3 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
+            Phone Number
+          </label>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            value={formData.phone}
+            onChange={handleInputChange}
+            placeholder="Enter your phone number"
+            className="w-full px-4 py-3 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="course" className="block text-sm font-semibold text-gray-700 mb-2">
+            Select Course
+          </label>
+          <select
+            id="course"
+            name="course"
+            value={formData.course}
+            onChange={handleInputChange}
+            required
+            className="w-full px-4 py-3 border text-gray-700 border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+          >
+            <option value="">-- Choose a Course --</option>
+            {courses.map((course) => (
+              <option key={course.id} value={course.title}>
+                {course.title}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="message" className="block text-sm font-semibold text-gray-700 mb-2">
+            Message
+          </label>
+          <textarea
+            id="message"
+            name="message"
+            value={formData.message}
+            onChange={handleInputChange}
+            required
+            rows="5"
+            placeholder="Tell us how we can help you..."
+            className="w-full px-4 py-3 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-vertical"
+          ></textarea>
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-4 px-6 rounded-lg transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 outline-none"
+        >
+          Send Now
+        </button>
+      </form>
+    </div>
+  );
+};
+
+// ✅ Loading fallback for Suspense
+const FormLoadingFallback = () => (
+  <div className="bg-white h-3/4 rounded-2xl shadow-lg p-6 lg:p-8 animate-pulse">
+    <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="h-12 bg-gray-200 rounded"></div>
+        <div className="h-12 bg-gray-200 rounded"></div>
+      </div>
+      <div className="h-12 bg-gray-200 rounded"></div>
+      <div className="h-12 bg-gray-200 rounded"></div>
+      <div className="h-12 bg-gray-200 rounded"></div>
+      <div className="h-32 bg-gray-200 rounded"></div>
+      <div className="h-14 bg-gray-200 rounded"></div>
+    </div>
+  </div>
+);
+
+// ✅ Main component with Suspense wrapper
+const ContactPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <style>{`
@@ -192,122 +331,10 @@ const ContactPage = () => {
             </div>
           </div>
 
-          {/* Right Section - Contact Form */}
-          <div className="bg-white h-3/4 rounded-2xl shadow-lg p-6 lg:p-8">
-            <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 mb-6">Get in Touch</h2>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-2">
-                    First Name 
-                  </label>
-                  <input
-                    type="text"
-                    id="firstName"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="Enter your first name"
-                    className="w-full px-4 py-3 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Last Name 
-                  </label>
-                  <input
-                    type="text"
-                    id="lastName"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="Enter your last name"
-                    className="w-full px-4 py-3 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Email Address 
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="Enter your email address"
-                  className="w-full px-4 py-3 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  placeholder="Enter your phone number"
-                  className="w-full px-4 py-3 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                />
-              </div>
-
-              {/* ✅ New Select Course Field */}
-              <div>
-                <label htmlFor="course" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Select Course 
-                </label>
-                <select
-                  id="course"
-                  name="course"
-                  value={formData.course}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-3 border text-gray-700 border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                >
-                  <option value="">-- Choose a Course --</option>
-                  {courses.map((course) => (
-                    <option key={course.id} value={course.title}>
-                      {course.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="message" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Message 
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  required
-                  rows="5"
-                  placeholder="Tell us how we can help you..."
-                  className="w-full px-4 py-3 border text-gray-700 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-vertical"
-                ></textarea>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-4 px-6 rounded-lg transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 outline-none"
-              >
-                Send Now
-              </button>
-            </form>
-          </div>
+          {/* ✅ Right Section - Contact Form wrapped in Suspense */}
+          <Suspense fallback={<FormLoadingFallback />}>
+            <ContactFormContent />
+          </Suspense>
         </div>
       </div>
     </div>
